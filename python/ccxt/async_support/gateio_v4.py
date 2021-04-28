@@ -118,6 +118,8 @@ class gateio_v4(Exchange):
         })
 
     async def fetch_order(self, id, symbol=None, params={}):
+        if symbol is None:
+            raise ArgumentsRequired(self.id + ' fetch_order() requires symbol argument')
         request = {
             'currency_pair': symbol,
         }
@@ -171,6 +173,16 @@ class gateio_v4(Exchange):
     async def create_order(self, symbol, type, side, amount, price=None, params={}):
         if type == 'market':
             raise ExchangeError(self.id + ' allows limit orders only')
+        if symbol is None:
+            raise ArgumentsRequired(self.id + ' create_order() requires symbol argument')
+        if amount is None:
+            raise ArgumentsRequired(self.id + ' create_order() requires amount argument')
+        if type is None:
+            raise ArgumentsRequired(self.id + ' create_order() requires type argument')
+        if side is None:
+            raise ArgumentsRequired(self.id + ' create_order() requires side argument')
+        if price is None:
+            raise ArgumentsRequired(self.id + ' create_order() requires price argument')
         request = {"currency_pair": symbol, "type": type, "account": "spot", "side": side, "amount": amount, "price": price}
         response = await self.privatePostOrders(self.extend(request, params))
         return self.parse_order(self.extend({
